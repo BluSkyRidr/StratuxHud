@@ -30,12 +30,7 @@ def display_init():
 
     size = DEFAULT_SCREEN_SIZE
     disp_no = os.getenv('DISPLAY')
-    if disp_no:
-        # if False:
-        # print "I'm running under X display = {0}".format(disp_no)
-        size = 320, 240
-        screen = pygame.display.set_mode(size)
-    else:
+    if not disp_no:
         # List of drivers:
         # https://wiki.libsdl.org/FAQUsingSDL
         drivers = ['fbcon', 'directfb', 'svgalib', 'directx', 'windib']
@@ -57,7 +52,6 @@ def display_init():
             raise Exception('No suitable video driver found!')
 
         size = DEFAULT_SCREEN_SIZE
-        screen_mode = pygame.HWACCEL
         # NOTE - HWSURFACE and DOUBLEBUF cause problems...
         # DOUBLEBUF
         # https://stackoverflow.com/questions/6395923/any-way-to-speed-up-python-and-pygame
@@ -65,12 +59,17 @@ def display_init():
         # TODO - Use "convert" on text without ALPHA...
         # https://en.wikipedia.org/wiki/PyPy
 
-        if local_debug.is_debug():
-            screen_mode |= pygame.RESIZABLE
-        else:
-            screen_mode |= pygame.FULLSCREEN
-            size = pygame.display.Info().current_w, pygame.display.Info().current_h
+    screen_mode = pygame.HWACCEL
+    if local_debug.is_debug():
+        screen_mode |= pygame.RESIZABLE
+    else:
+        screen_mode |= pygame.FULLSCREEN
 
-        screen = pygame.display.set_mode(size, screen_mode)
+    screen = pygame.display.set_mode(size, screen_mode)
+    display_info = pygame.display.Info()
+
+    print("hw={}, wm={}, blit_hw={}".format(display_info.hw, display_info.wm, display_info.blit_hw))
+
+    size = display_info.current_w, display_info.current_h
 
     return screen, size
